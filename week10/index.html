@@ -1,0 +1,171 @@
+<div id="contain"></div>
+<script>
+  const pattern = [
+    [0, 0, 0],
+    [0, 0, 0],
+    [0, 0, 2]
+  ];
+  let color = 1
+  function show() {
+    const contain = document.getElementById('contain');
+    contain.innerHTML = ''
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 3; j++) {
+        const cell = document.createElement('div');
+        cell.classList.add('cell')
+        cell.innerHTML =
+          // pattern[j][i] === 2 ? 'x' :
+          // pattern[j][i] === 1 ? '0' :
+          pattern[i][j] === 2 ? '❌' :
+          pattern[i][j] === 1 ? '⭕️' :
+          '';
+          cell.addEventListener('click', () => move(j, i))
+        contain.appendChild(cell)
+      }
+    }
+  }
+  show();
+  // 點擊
+  function move(x, y) {
+    if (!pattern[y][x]) {
+      pattern[y][x] = color
+      if (check(pattern, color)) {
+        alert(color === 2 ? '❌ is Win' : '⭕️ is Win')
+      }
+      color = 3 - color
+      show()
+      betsChoise(pattern, color)
+      if (willWin(pattern, color)) {
+        console.log(color === 2 ? '❌ will is Win' : '⭕️ will is Win')
+      }
+    }
+  }
+
+  function computeMove(pattern, color) {
+  let choice = betsChoise(pattern, color)
+  if (choice.point) {
+  pattern[choice.point[1]][choice.point[0]] = choice.point
+  }
+  if (check(pattern, color)) {
+  alert(color === 2 ? '❌ is Win' : '⭕️ is Win')
+  }
+  color = 3 - color
+  show();
+  }
+
+  function check(pattern, color, x, y) {
+    for(let i = 0; i < 3; i++) {
+      let win = true
+      for (let j = 0; j < 3; j++) {
+        if (pattern[i][j] !== color) {
+          win = false
+          break
+        }
+      }
+      if (win) {
+        return true
+      }
+    }
+    for(let i = 0; i < 3; i++) {
+      let win = true
+      for (let j = 0; j < 3; j++) {
+        if (pattern[j][i] !== color) {
+          win = false
+          break
+        }
+      }
+      if (win) {
+        return true
+      }
+    }
+    {
+      let win = true;
+      for (let j = 0; j < 3; j++) {
+        if (pattern[j][j] !== color) {
+          win = false;
+          break;
+        }
+      }
+      if (win) {
+        return true;
+      }
+    }
+    {
+      let win = true;
+      for (let j = 0; j < 3; j++) {
+        if (pattern[j][-2 - j] !== color) {
+          win = false;
+          break;
+        }
+      }
+      if (win) {
+        return true;
+      }
+    }
+    return false
+  }
+  function willWin(pattern, color) {
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 3; j++) {
+        if (pattern[i][j]) {
+          continue;
+        }
+        let tmp = JSON.parse(JSON.stringify(pattern))
+        tmp[i][j] = color
+        if (check(tmp, color)) {
+          return [j, i]
+        }
+      }
+    }
+    return null;
+  }
+
+
+
+  function betsChoise(pattern, color) {
+    let point = willWin(pattern, color)
+    if (point) {
+      return {
+        point: point,
+        result: 1
+      }
+    }
+    let result = -1
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 3; j++) {
+        if (pattern[i][j]) {
+          continue;
+        }
+        let tmp = JSON.parse(JSON.stringify(pattern))
+        tmp[i][j] = color
+        // 对手
+        let opp = betsChoise(tmp, 3 - color)
+        if (-opp.result >= result ) {
+          point = [j, i]
+          result = -opp.result
+        }
+      }
+    }
+    return {
+      point: point,
+      result: point ? result : 0
+    }
+  }
+</script>
+
+<style>
+.contain {
+  width: 350px;
+}
+.cell {
+  width: 100px;
+  height: 100px;
+  line-height: 100px;
+  border: 1px solid white;
+  background-color: green;
+  display: inline-block;
+  vertical-align: middle;
+  font-size: 50px;
+  text-align: center;
+}
+</style>
